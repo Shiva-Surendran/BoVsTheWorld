@@ -25,7 +25,7 @@ let groundOffset = 0;
 
 // --- REMOTE CONTROL SETUP ---
 // 🚨 REPLACE THE IP BELOW with your laptop's actual IP address!
-const WEBSOCKET_ADDRESS = (location.origin.replace(/^http/, 'ws'));
+const socket = new WebSocket("wss://portfolio-5m5t.vercel.app");
 let socket;
 
 function connectWebSocket() {
