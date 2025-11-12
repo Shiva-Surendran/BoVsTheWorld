@@ -44,11 +44,12 @@
     <div id="status">Status: Waiting for permission...</div>
 
     <script>
-const socket = new WebSocket("wss://portfolio-5m5t.vercel.app");
         
         let socket;
         let lastZ = 0; // Tracks acceleration on the Z-axis 
         const THRESHOLD = 15; // Sensitivity for detecting an upward flick 
+        const WEBSOCKET_ADDRESS = "wss://portfolio-5m5t.vercel.app";
+
 
         // ------------------ NETWORK SETUP ------------------
         function connectController() {
