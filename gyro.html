@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Robot Game Controller</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <style>
+        body {
+            background-color: #3498DB; /* Blue background to indicate active status */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: sans-serif;
+            color: white;
+            text-align: center;
+            touch-action: manipulation; /* Prevents screen scrolling on touch */
+        }
+        button {
+            padding: 20px 40px;
+            font-size: 24px;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            background-color: #2ECC71; /* Green button */
+            color: white;
+            box-shadow: 0 4px #27AE60;
+        }
+        button:active {
+            box-shadow: 0 1px #27AE60;
+            transform: translateY(3px);
+        }
+        #status { 
+            margin-top: 20px; 
+            font-size: 18px; 
+            font-weight: bold; 
+        }
+    </style>
+</head>
+<body>
+    <h1>Flick Up to Jump!</h1>
+    <button id="permissionButton">Tap to Start Motion Control</button>
+    <div id="status">Status: Waiting for permission...</div>
+
+    <script>
+        // 🚨 CONFIGURATION: REPLACE THE IP ADDRESS BELOW 🚨
+    const WEBSOCKET_ADDRESS = location.origin.replace(/^http/, 'ws');
+        
+        let socket;
+        let lastZ = 0; // Tracks acceleration on the Z-axis (up/down through the screen)
+        const THRESHOLD = 15; // Sensitivity for detecting an upward flick (tune this number if needed)
+
+        // ------------------ NETWORK SETUP ------------------
+        function connectController() {
+            socket = new WebSocket(WEBSOCKET_ADDRESS);
+            socket.onopen = () => {
+                document.getElementById('status').innerText = "Status: CONNECTED! Flick your phone up quickly to jump.";
+            };
+            socket.onerror = (error) => {
+                 document.getElementById('status').innerText = "Status: Connection Error! Check server & IP.";
+            };
+            socket.onclose = () => {
+                document.getElementById('status').innerText = "Status: Disconnected. Restart server or refresh.";
+            }
+        }
+        
+        function sendJump() {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.send("JUMP");
+            }
+        }
+        
+        // ------------------ MOTION LOGIC ------------------
+
+        function handleMotion(event) {
+            // event.acceleration.z measures acceleration along the Z-axis
+            const accZ = event.acceleration.z; 
+
+            // Detect a quick upward flick (a positive change in Z acceleration)
+            if (accZ - lastZ > THRESHOLD) {
+                sendJump();
+            }
+            lastZ = accZ;
+        }
+
+        // ------------------ PERMISSION HANDLER ------------------
+        const permissionButton = document.getElementById('permissionButton');
+        
+        permissionButton.addEventListener('click', () => {
+            // Check for iOS 13+ permission request requirement
+            if (typeof DeviceMotionEvent.requestPermission === 'function') {
+                DeviceMotionEvent.requestPermission()
+                    .then(permissionState => {
+                        if (permissionState === 'granted') {
+                            window.addEventListener('devicemotion', handleMotion);
+                            permissionButton.style.display = 'none';
+                            connectController();
+                        } else {
+                            document.getElementById('status').innerText = "Status: Motion permission denied by user.";
+                        }
+                    })
+                    .catch(e => {
+                         document.getElementById('status').innerText = "Status: Error requesting motion permission.";
+                    });
+            } else {
+                // For Android and other browsers that don't need explicit permission
+                window.addEventListener('devicemotion', handleMotion);
+                permissionButton.style.display = 'none';
+                connectController();
+            }
+        });
+        
+    </script>
+</body>
+</html>
