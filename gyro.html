@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <style>
         body {
-            background-color: #3498DB; /* Blue background to indicate active status */
+            background-color: #3498DB; 
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -15,7 +15,7 @@
             font-family: sans-serif;
             color: white;
             text-align: center;
-            touch-action: manipulation; /* Prevents screen scrolling on touch */
+            touch-action: manipulation; 
         }
         button {
             padding: 20px 40px;
@@ -23,7 +23,7 @@
             cursor: pointer;
             border: none;
             border-radius: 8px;
-            background-color: #2ECC71; /* Green button */
+            background-color: #2ECC71; 
             color: white;
             box-shadow: 0 4px #27AE60;
         }
@@ -44,12 +44,11 @@
     <div id="status">Status: Waiting for permission...</div>
 
     <script>
-        // 🚨 CONFIGURATION: REPLACE THE IP ADDRESS BELOW 🚨
-    const WEBSOCKET_ADDRESS = location.origin.replace(/^http/, 'ws');
+const socket = new WebSocket("wss://portfolio-5m5t.vercel.app");
         
         let socket;
-        let lastZ = 0; // Tracks acceleration on the Z-axis (up/down through the screen)
-        const THRESHOLD = 15; // Sensitivity for detecting an upward flick (tune this number if needed)
+        let lastZ = 0; // Tracks acceleration on the Z-axis 
+        const THRESHOLD = 15; // Sensitivity for detecting an upward flick 
 
         // ------------------ NETWORK SETUP ------------------
         function connectController() {
@@ -88,7 +87,6 @@
         const permissionButton = document.getElementById('permissionButton');
         
         permissionButton.addEventListener('click', () => {
-            // Check for iOS 13+ permission request requirement
             if (typeof DeviceMotionEvent.requestPermission === 'function') {
                 DeviceMotionEvent.requestPermission()
                     .then(permissionState => {
@@ -104,7 +102,6 @@
                          document.getElementById('status').innerText = "Status: Error requesting motion permission.";
                     });
             } else {
-                // For Android and other browsers that don't need explicit permission
                 window.addEventListener('devicemotion', handleMotion);
                 permissionButton.style.display = 'none';
                 connectController();
